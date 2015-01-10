@@ -16,7 +16,7 @@ class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
         absRootPathEntry = os.path.join(absRootPath, entry)
         
         # split large files
-        if os.path.isfile(absRootPathEntry):
+        if not os.path.isdir(absRootPathEntry):
             fileSize = os.path.getsize(absRootPathEntry)
             if fileSize > self.maxFileSize:
                 numberOfParts = fileSize // self.maxFileSize + 1

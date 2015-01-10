@@ -18,7 +18,10 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
         return super(SplitViewFuseBase, self).__call__(op, path, *args)
     
     def __getAbsolutePath(self, path):
-        return self.root + path
+        absRootPath = self.root + path
+        if os.path.islink(absRootPath):
+            return os.path.realpath(absRootPath)
+        return absRootPath
    
     @abstractmethod
     def __processReadDirEntry(self, absRootPath, entry):
@@ -106,7 +109,7 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
             dirContent.extend(self.__processReadDirEntry(absRootPath, entry))
         return dirContent       
 
-    def readlink(self, path, buf, bufsize):
+    def readlink(self, path):
         raise FuseOSError(EPERM)
 
     def release(self, path, fh):

@@ -10,6 +10,8 @@ class Single2SegmentVirtualFile(VirtualFile):
         super(Single2SegmentVirtualFile, self).__init__(absRootPath)
         
         path, nr = SegmentUtils.splitSegmentPath(absRootPath)
+        if os.path.islink(path):
+            path = os.path.realpath(path)
         
         if nr is None and os.path.isfile(absRootPath) and os.path.getsize(absRootPath) > maxSegmentSize:
             raise FuseOSError(ENOENT)
