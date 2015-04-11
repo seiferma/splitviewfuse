@@ -13,11 +13,10 @@ deploy:
   server: https://pypi.python.org/pypi
   user: seiferma
   password:
-    secure: Ok03/5xX2YYIob5s3NaW2sxLdRvhL96auL33rgIVXln1WdIakgP991yXrEC3b6fxiQdIWoVaPXZrfc3Ttq8InfcVylGKntTk3qluG8yjgFXonGmymEpWzJ/BufLergN0zjMs6n0MasX6JMM7vJ2rRGL8maqLJTx/Jf8e4qCDNqA=
+    secure: C62GZK1Kc8CwMTPu1Snoswkfpa6wE/N7H/kDvKlG1QOerzPOhUxK2KrJzgB6kCXxw9OyFPrgC8T5aDufqMEoSuDZYlni9OI/Yhvg9Mzx/N67oxcMMtiHgbzK2s9KQujf9V23GOmlrGkVk/c2/14AJQpu3jhgCrDUM5bp68Pyi8k=
   on:
     tags: true
     condition: $TRAVIS_PYTHON_VERSION = '2.7'
 after_deploy:
-  - git clone https://github.com/seiferma/travis-utils.git
-  - python travis-utils/validate_pypi_2x.py -v || exit 1
-
+- git clone https://github.com/seiferma/travis-utils.git
+- python travis-utils/validate_pypi_2x.py -v || exit 1
