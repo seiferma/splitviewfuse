@@ -18,8 +18,8 @@ class TestTmpDirectory(object):
 
     def __createDir(self, segmentSize):
         self.tmpDir = mkdtemp()
-        self.segment1File = self.__createFileWithRandomContent(self.tmpDir, 'abc.seg.1', segmentSize)
-        self.segment2File = self.__createFileWithRandomContent(self.tmpDir, 'abc.seg.2', segmentSize - 1)
+        self.segment1File = self.__createFileWithRandomContent(self.tmpDir, 'abc.seg.0', segmentSize)
+        self.segment2File = self.__createFileWithRandomContent(self.tmpDir, 'abc.seg.1', segmentSize - 1)
         self.regularfile = self.__createFileWithRandomContent(self.tmpDir, 'def', 2 * segmentSize - 1)
         self.regularfile2 = self.__createFileWithRandomContent(self.tmpDir, 'ghi', segmentSize)
         self.slRegularFile = self.regularfile + '.symlink'
@@ -29,9 +29,9 @@ class TestTmpDirectory(object):
         self.slTmpDir = os.path.join(self.tmpDir, 'tmpDir.symlink')
         os.symlink(self.tmpDir, self.slTmpDir)
         self.notExistingFile = mktemp()
-        self.tooBigSegmentFile = self.__createFileWithRandomContent(self.tmpDir, 'jkl.seg.1', segmentSize + 1)
-        self.brokenNumberSegmentfile = self.__createFileWithRandomContent(self.tmpDir, 'mno.seg.2', segmentSize)
-        self.notExistingSegmentFile = os.path.join(self.tmpDir, 'notExistingSegmentFile.seg.1')
+        self.tooBigSegmentFile = self.__createFileWithRandomContent(self.tmpDir, 'jkl.seg.0', segmentSize + 1)
+        self.brokenNumberSegmentfile = self.__createFileWithRandomContent(self.tmpDir, 'mno.seg.1', segmentSize)
+        self.notExistingSegmentFile = os.path.join(self.tmpDir, 'notExistingSegmentFile.seg.0')
         self.notAccessibleFile = self.__createFileWithRandomContent(self.tmpDir, 'notReadableFile', segmentSize)
         os.chmod(self.notAccessibleFile, os.stat(self.notAccessibleFile).st_mode & ~(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH))
         

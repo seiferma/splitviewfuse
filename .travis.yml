@@ -6,8 +6,12 @@ addons:
     packages:
     - libfuse2
 install:
-- pip install .
-script: nosetests
+  - pip install .
+  - pip install coveralls
+script:
+  - nosetests --with-coverage --cover-package=splitviewfuse
+after_success:
+  - coveralls
 deploy:
   provider: pypi
   server: https://pypi.python.org/pypi
@@ -18,5 +22,5 @@ deploy:
     tags: true
     condition: $TRAVIS_PYTHON_VERSION = '2.7'
 after_deploy:
-- git clone https://github.com/seiferma/travis-utils.git
-- python travis-utils/validate_pypi_2x.py -v || exit 1
+  - git clone https://github.com/seiferma/travis-utils.git
+  - python travis-utils/validate_pypi_2x.py -v || exit 1

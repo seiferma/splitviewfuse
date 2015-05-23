@@ -15,9 +15,9 @@ class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
 
     def _SplitViewFuseBase__processReadDirEntry(self, absRootPath, entry):
         dirContent = list()
-        
+
         absRootPathEntry = os.path.join(absRootPath, entry)
-        
+
         # split large files
         if not os.path.isdir(absRootPathEntry):
             fileSize = os.path.getsize(absRootPathEntry)

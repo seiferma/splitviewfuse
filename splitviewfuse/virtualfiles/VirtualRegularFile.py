@@ -71,7 +71,7 @@ class VirtualRegularFile(VirtualFile):
         
         # Validate found segment numbers
         segmentNumbers = [SegmentUtils.splitSegmentPath(entry.getPath())[1] for entry in entries]
-        if not all(i in segmentNumbers for i in range(1, max(segmentNumbers))):
+        if not all(i in segmentNumbers for i in range(0, max(segmentNumbers))):
             raise ValueError('Not all required (inner) segments could be found.')
         
         # Validate found segment sizes
