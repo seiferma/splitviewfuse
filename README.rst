@@ -2,6 +2,8 @@ splitviewfuse
 =============
 .. image:: https://secure.travis-ci.org/seiferma/splitviewfuse.png
     :target: http://travis-ci.org/seiferma/splitviewfuse
+.. image:: https://coveralls.io/repos/seiferma/splitviewfuse/badge.png?branch=master
+    :target: https://coveralls.io/r/seiferma/splitviewfuse?branch=master
 
 Description
 -----------
@@ -15,6 +17,7 @@ The file system is available for Python 2 via pypi (splitviewfuse).
 Usage
 -----
 ``splitviewfuse <source directory> <mount point> -o segmentsize<size>``
+
 ``unionviewfuse <source directory> <mount point> -o segmentsize<size>``
 
 +-------------------------+-----------------------------------------------------------+
