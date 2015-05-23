@@ -1,16 +1,19 @@
 from splitviewfuse.virtualfiles.VirtualFile import VirtualFile, LazyFile
 from splitviewfuse.SegmentUtils import SegmentUtils
 import os
-from errno import ENOENT
 
-class Segment2SingleVirtualFile(VirtualFile):
+class VirtualRegularFile(VirtualFile):
     
     def __init__(self, absRootPath, maxSegmentSize):
-        self.allSegments = self.__findAllSegments(absRootPath)
+        # Validate and save maximum segment size
+        if not isinstance(maxSegmentSize, (int, long)) or maxSegmentSize < 1:
+            raise ValueError('The maximum segment size must be a positive non-null integer.')
         self.maxSegmentSize = maxSegmentSize
-        if len(self.allSegments) < 1:
-            raise OSError(ENOENT)
-        super(Segment2SingleVirtualFile, self).__init__(self.allSegments[-1].getPath())
+        
+        # Look for corresponding segments
+        self.allSegments = VirtualRegularFile.__findAllSegments(absRootPath, maxSegmentSize)
+
+        super(VirtualRegularFile, self).__init__(self.allSegments[-1].getPath())
         self.sz = (len(self.allSegments) - 1) * maxSegmentSize + os.path.getsize(self.allSegments[-1].getPath())
 
     def read(self, offset, size):
@@ -36,19 +39,41 @@ class Segment2SingleVirtualFile(VirtualFile):
         for segment in self.allSegments:
             segment.close()
             
-    def __findAllSegments(self, path):
+    @staticmethod
+    def __findAllSegments(path, maxSegmentSize):
+        #TODO Handle symlinks correctly
+        
+        # Split the given path
         absRootPathDir = os.path.dirname(path)
         fileName = os.path.basename(path)
         segmentName, segmentNumber = SegmentUtils.splitSegmentPath(fileName)
+        
+        # If path is not segmented, return the file wrapper for the given path
         if segmentNumber is None and os.path.exists(path):
+            if os.path.getsize(path) > maxSegmentSize:
+                raise ValueError('Files must not be bigger than the maximum segment size.')
             return [LazyFile(path)]
         
+        # Find all segments belonging to the given path
         entries = list()
         for entry in os.listdir(absRootPathDir):
             entryBase, _ = SegmentUtils.splitSegmentPath(entry)
             if entryBase == segmentName:
                 entries.append(LazyFile(os.path.join(absRootPathDir, entry)))
         entries.sort(key=lambda x: SegmentUtils.splitSegmentPath(x.getPath())[1])
+        
+        if len(entries) < 1:
+            raise ValueError('No corresponding segments could be found.')
+        
+        # Validate found segment numbers
+        segmentNumbers = [SegmentUtils.splitSegmentPath(entry.getPath())[1] for entry in entries]
+        if not all(i in segmentNumbers for i in range(1, max(segmentNumbers))):
+            raise ValueError('Not all required (inner) segments could be found.')
+        
+        # Validate found segment sizes
+        if not all(os.path.getsize(entry.getPath()) is maxSegmentSize for entry in entries[0:-1]) or os.path.getsize(entries[-1].getPath()) > maxSegmentSize:
+            raise ValueError('The size of at least one found segment is wrong.')
+        
         return entries
 
         

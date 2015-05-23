@@ -11,6 +11,8 @@ class FileHandleContainer(object):
         self.lock = Lock()
     
     def registerHandle(self, path):
+        if path is None:
+            raise ValueError("A path has to be given for registering a handle.")
         with self.lock:
             fileHandleObject = self.createHandleObject(path)
             fileHandleIndex = self.__getNextFreeIndex()
@@ -19,12 +21,14 @@ class FileHandleContainer(object):
     
     def getHandle(self, index):
         with self.lock:
+            if not self.handles.has_key(index):
+                raise ValueError("Invalid handle indentifier given.")
             return self.handles[index]
     
     def unregisterHandle(self, index):
         with self.lock:
             if index not in self.handles.keys():
-                return None
+                return
             self.freeIndices.append(index)
             handleObject = self.handles.pop(index)
             self.__cleanupHandleObject(handleObject)

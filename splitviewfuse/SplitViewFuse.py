@@ -1,6 +1,6 @@
 from fuse import FUSE
 from splitviewfuse import SplitViewFuseBase
-from splitviewfuse.filehandlecontainers.Single2SegmentVirtualFileHandleContainer import Single2SegmentVirtualFileHandleContainer
+from splitviewfuse.filehandlecontainers.VirtualFileSegmentFileHandleContainer import VirtualFileSegmentFileHandleContainer
 from splitviewfuse.SegmentUtils import SegmentUtils
 import os
 
@@ -8,7 +8,7 @@ import os
 class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
     
     def __init__(self, root, maxSegmentSize):
-        super(SplitViewFuse, self).__init__(root, maxSegmentSize, Single2SegmentVirtualFileHandleContainer(maxSegmentSize))
+        super(SplitViewFuse, self).__init__(root, maxSegmentSize, VirtualFileSegmentFileHandleContainer(maxSegmentSize))
 
     def _SplitViewFuseBase__processReadDirEntry(self, absRootPath, entry):
         dirContent = list()

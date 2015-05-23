@@ -1,13 +1,14 @@
 from fuse import FUSE
 from splitviewfuse import SplitViewFuseBase
-from splitviewfuse.filehandlecontainers.Segment2SingleVirtualFileHandleContainer import Segment2SingleVirtualFileHandleContainer
+
 from splitviewfuse.SegmentUtils import SegmentUtils
+from splitviewfuse.filehandlecontainers.VirtualRegularFileFileHandleContainer import VirtualRegularFileFileHandleContainer
 
 
 class UnionViewFuse(SplitViewFuseBase.SplitViewFuseBase):
     
     def __init__(self, root, maxSegmentSize):
-        super(UnionViewFuse, self).__init__(root, maxSegmentSize, Segment2SingleVirtualFileHandleContainer(maxSegmentSize))
+        super(UnionViewFuse, self).__init__(root, maxSegmentSize, VirtualRegularFileFileHandleContainer(maxSegmentSize))
 
     def _SplitViewFuseBase__processReadDirEntry(self, absRootPath, entry):
         dirContent = list()

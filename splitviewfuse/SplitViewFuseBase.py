@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, ArgumentTypeError, Action
-from errno import EACCES, EPERM
+from errno import EACCES, EPERM, ENOENT, EBADF, EBADFD
 from fuse import FuseOSError, Operations, LoggingMixIn
 import os, stat
 
@@ -68,9 +68,12 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
             st = os.lstat(absRootPath)
             size = st.st_size
         else:
-            with self.fileHandleContainer.createHandleObject(absRootPath) as virtualFile:
-                st = os.lstat(virtualFile.getPath())
-                size = virtualFile.size()
+            try:
+                with self.fileHandleContainer.createHandleObject(absRootPath) as virtualFile:
+                    st = os.lstat(virtualFile.getPath())
+                    size = virtualFile.size()
+            except ValueError:
+                raise FuseOSError(ENOENT)
 
         stats = dict((key, getattr(st, key)) for key in ('st_atime', 'st_ctime',
                 'st_gid', 'st_mode', 'st_mtime', 'st_nlink', 'st_size', 'st_uid'))
@@ -96,11 +99,17 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
         if flags & (os.O_CREAT | os.O_APPEND | os.O_RDWR | os.O_WRONLY) != 0:
             raise FuseOSError(EPERM)
         absRootPath = self.__getAbsolutePath(path)
-        return self.fileHandleContainer.registerHandle(absRootPath)
+        try:
+            return self.fileHandleContainer.registerHandle(absRootPath)
+        except ValueError:
+            raise FuseOSError(ENOENT)
 
     def read(self, path, size, offset, fh):
-        virtualFile = self.fileHandleContainer.getHandle(fh)
-        return virtualFile.read(offset, size)
+        try:
+            virtualFile = self.fileHandleContainer.getHandle(fh)
+            return virtualFile.read(offset, size)
+        except ValueError:
+            raise FuseOSError(EBADFD)
         
     def readdir(self, path, fh):
         dirContent = ['.', '..']

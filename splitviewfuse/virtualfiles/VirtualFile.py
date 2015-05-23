@@ -38,6 +38,15 @@ class VirtualFile(object):
         '''
 
 class LazyFile(object):
+    '''
+    Wrapper for a file handle object.
+    
+    The wrapper uses lazy instantiation, so the file handle is not initialized
+    before the first usage.
+    The wrapper is thread-safe, so it can be used from within multiple threads.
+    In such cases the requests to the wrapper are executed sequentially.
+    '''
+    
     def __init__(self, absPath):
         self.path = absPath
         self.file = None

@@ -6,3 +6,23 @@ splitviewfuse
 Description
 -----------
 A view on a given directory that splits large files into segmentes implemented as FUSE file system.
+An additional filesystem that merges such segments into regular files is included as well.
+
+Installation
+------------
+The file system is available for Python 2 via pypi (splitviewfuse).
+
+Usage
+-----
+``splitviewfuse <source directory> <mount point> -o segmentsize<size>``
+``unionviewfuse <source directory> <mount point> -o segmentsize<size>``
+
++-------------------------+-----------------------------------------------------------+
+| Option Value            | Meaning                                                   |
++=========================+===========================================================+
+| ``source directory``    | The directory containing the files to be encrypted        |
++-------------------------+-----------------------------------------------------------+
+| ``mount point``         | The mount point for the encrypted view                    |
++-------------------------+-----------------------------------------------------------+
+| ``segmentSize``         | The maximum size of a segment in bytes                    |
++-------------------------+-----------------------------------------------------------+
