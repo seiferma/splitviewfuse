@@ -3,6 +3,9 @@ from splitviewfuse import SplitViewFuseBase
 from splitviewfuse.filehandlecontainers.VirtualFileSegmentFileHandleContainer import VirtualFileSegmentFileHandleContainer
 from splitviewfuse.SegmentUtils import SegmentUtils
 import os
+import sys
+from splitviewfuse.SplitViewFuseBase import ArgumentParserError
+from argparse import ArgumentTypeError
 
 
 class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
@@ -31,9 +34,16 @@ class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
 
 
 def main():
-    args = SplitViewFuseBase.parseArguments()
-    _ = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, **args.mountOptions['other'])
-    #fuse = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, nothreads=True, foreground=True)
+    try:
+        args = SplitViewFuseBase.parseArguments(sys.argv)
+        _ = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, **args.mountOptions['other'])
+        #fuse = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, nothreads=True, foreground=True)
+    except ArgumentParserError as e:
+        print('Error during command line parsing: {0}'.format(str(e)))
+        sys.exit(1)
+    except ArgumentTypeError as e:
+        print('Error during command line parsing: {0}'.format(str(e)))
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()

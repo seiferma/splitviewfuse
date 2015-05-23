@@ -54,6 +54,10 @@ class VirtualRegularFile(VirtualFile):
                 raise ValueError('Files must not be bigger than the maximum segment size.')
             return [LazyFile(path)]
         
+        # If path does not exist, raise error
+        if not os.path.exists(absRootPathDir):
+            raise ValueError('The directory of the given path {0} does not exist.'.format(path))
+        
         # Find all segments belonging to the given path
         entries = list()
         for entry in os.listdir(absRootPathDir):

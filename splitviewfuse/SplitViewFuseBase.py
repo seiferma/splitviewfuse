@@ -1,6 +1,6 @@
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, ArgumentTypeError, Action
-from errno import EACCES, EPERM, ENOENT, EBADF, EBADFD
+from errno import EACCES, EPERM, ENOENT, EBADFD
 from fuse import FuseOSError, Operations, LoggingMixIn
 import os, stat
 
@@ -30,7 +30,7 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
         '''
 
     def access(self, path, mode):
-        if mode is os.W_OK:
+        if mode & os.W_OK != 0:
             raise FuseOSError(EACCES)
             
         pathToTest = self.__getAbsolutePath(path)
@@ -116,7 +116,7 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
         absRootPath = self.__getAbsolutePath(path)
         for entry in os.listdir(absRootPath):
             dirContent.extend(self.__processReadDirEntry(absRootPath, entry))
-        return dirContent       
+        return dirContent
 
     def readlink(self, path):
         raise FuseOSError(EPERM)
@@ -131,6 +131,7 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
         raise FuseOSError(EPERM)
 
     def statfs(self, path):
+        # TODO try to calculate useful information
         stv = os.statvfs(self.__getAbsolutePath(path))
         return dict((key, getattr(stv, key)) for key in ('f_bavail', 'f_bfree',
             'f_blocks', 'f_bsize', 'f_favail', 'f_ffree', 'f_files', 'f_flag',
@@ -145,7 +146,8 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
     def unlink(self, path):
         raise FuseOSError(EPERM)
 
-    utimens = os.utime
+    def utimens(self, path, times=None):
+        raise FuseOSError(EPERM)
 
     def write(self, path, data, offset, fh):
         raise FuseOSError(EPERM)
@@ -168,6 +170,8 @@ class MountOptions(Action):
         resultObject["segmentsize"] = None
         maxFileSizeOptions = [s for s in options if s.startswith("segmentsize=")]
         resultObject["segmentsize"] = int(maxFileSizeOptions[0][len("segmentsize="):])
+        if resultObject["segmentsize"] < 1:
+            raise ArgumentParserError("The given maximum segment size is invalid because it is less than 1.")
             
         interestingOptions = ["segmentsize="]
         filteredOptions = filter(lambda x: not any(x.startswith(string) for string in interestingOptions), options)
@@ -204,11 +208,20 @@ def __are_mount_options(options):
         
     return options
 
+class ArgumentParserError(Exception): pass
+class __ThrowingArgumentParser(ArgumentParser):
+    def error(self, message):
+        raise ArgumentParserError(message)
 
-def parseArguments():
-    parser = ArgumentParser(description='Encrypted file system for large cloud backups')
+def parseArguments(args):
+    '''
+    Parses the arguments received from the command line.
+    Do not modify the argument count or order. This function needs the first parameter
+    indicating the executed program to succeed.
+    '''
+    parser = __ThrowingArgumentParser(description='Encrypted file system for large cloud backups')
     parser.add_argument('device', action=FullPaths, type=__is_dir, help='the document root for the original files')
     parser.add_argument('dir', action=FullPaths, type=__is_dir, help='the mount point')
     parser.add_argument("-o", action=MountOptions, type=__are_mount_options, required=True, dest='mountOptions', help='mount options')
-    return parser.parse_args()
+    return parser.parse_args(args[1:])
 

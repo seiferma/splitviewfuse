@@ -1,5 +1,6 @@
 import os, shutil
 from tempfile import mkdtemp, mktemp
+import stat
 
 class TestTmpDirectory(object):
     '''
@@ -23,12 +24,16 @@ class TestTmpDirectory(object):
         self.regularfile2 = self.__createFileWithRandomContent(self.tmpDir, 'ghi', segmentSize)
         self.slRegularFile = self.regularfile + '.symlink'
         os.symlink(self.regularfile, self.slRegularFile)
+        self.slRegularFile2 = self.regularfile2 + '.symlink'
+        os.symlink(self.regularfile2, self.slRegularFile2)
         self.slTmpDir = os.path.join(self.tmpDir, 'tmpDir.symlink')
         os.symlink(self.tmpDir, self.slTmpDir)
         self.notExistingFile = mktemp()
         self.tooBigSegmentFile = self.__createFileWithRandomContent(self.tmpDir, 'jkl.seg.1', segmentSize + 1)
         self.brokenNumberSegmentfile = self.__createFileWithRandomContent(self.tmpDir, 'mno.seg.2', segmentSize)
         self.notExistingSegmentFile = os.path.join(self.tmpDir, 'notExistingSegmentFile.seg.1')
+        self.notAccessibleFile = self.__createFileWithRandomContent(self.tmpDir, 'notReadableFile', segmentSize)
+        os.chmod(self.notAccessibleFile, os.stat(self.notAccessibleFile).st_mode & ~(stat.S_IRUSR | stat.S_IRGRP | stat.S_IROTH))
         
     def getFilePathInSymlinkedDir(self, filePath):
         requestedFile = filePath.replace(self.tmpDir, '')
