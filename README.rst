@@ -7,7 +7,7 @@ splitviewfuse
 
 Description
 -----------
-A view on a given directory that splits large files into segmentes implemented as FUSE file system.
+A view on a given directory that splits large files into segments implemented as FUSE file system.
 An additional filesystem that merges such segments into regular files is included as well.
 
 Installation
@@ -27,5 +27,5 @@ Usage
 +-------------------------+-----------------------------------------------------------+
 | ``mount point``         | The mount point for the encrypted view                    |
 +-------------------------+-----------------------------------------------------------+
-| ``segmentSize``         | The maximum size of a segment in bytes                    |
+| ``size``                | The maximum size of a segment in bytes                    |
 +-------------------------+-----------------------------------------------------------+
