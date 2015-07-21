@@ -16,9 +16,9 @@ The file system is available for Python 2 via pypi (splitviewfuse).
 
 Usage
 -----
-``splitviewfuse <source directory> <mount point> -o segmentsize<size>``
+``splitviewfuse <source directory> <mount point> -o segmentsize=<size>``
 
-``unionviewfuse <source directory> <mount point> -o segmentsize<size>``
+``unionviewfuse <source directory> <mount point> -o segmentsize=<size>``
 
 +-------------------------+-----------------------------------------------------------+
 | Option Value            | Meaning                                                   |
@@ -27,5 +27,5 @@ Usage
 +-------------------------+-----------------------------------------------------------+
 | ``mount point``         | The mount point for the encrypted view                    |
 +-------------------------+-----------------------------------------------------------+
-| ``size``                | The maximum size of a segment in bytes                    |
+| ``segmentsize``         | The maximum size of a segment in bytes                    |
 +-------------------------+-----------------------------------------------------------+
