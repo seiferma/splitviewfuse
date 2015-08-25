@@ -23,7 +23,7 @@ class UnionViewFuse(SplitViewFuseBase.SplitViewFuseBase):
 
 def main():
     try:
-        args = SplitViewFuseBase.parseArguments(sys.argv)
+        args = SplitViewFuseBase.parseArguments(sys.argv, 'Filesystem that merges segmented files into complete ones.')
         _ = FUSE(UnionViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, **args.mountOptions['other'])
         #fuse = FUSE(UnionViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, nothreads=True, foreground=True)
     except ArgumentParserError as e:

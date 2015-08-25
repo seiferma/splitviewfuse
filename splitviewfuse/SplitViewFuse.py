@@ -35,7 +35,7 @@ class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
 
 def main():
     try:
-        args = SplitViewFuseBase.parseArguments(sys.argv)
+        args = SplitViewFuseBase.parseArguments(sys.argv, 'Filesystem that splits files into segments of given size.')
         _ = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, **args.mountOptions['other'])
         #fuse = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, nothreads=True, foreground=True)
     except ArgumentParserError as e:
