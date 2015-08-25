@@ -213,7 +213,7 @@ class __ThrowingArgumentParser(ArgumentParser):
     def error(self, message):
         raise ArgumentParserError(message)
 
-def parseArguments(args, descriptionText):
+def parseArguments(args, descriptionText='Filesystem'):
     '''
     Parses the arguments received from the command line.
     Do not modify the argument count or order. This function needs the first parameter
