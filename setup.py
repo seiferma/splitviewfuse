@@ -9,7 +9,7 @@ with open(path.join(here, 'README.rst'), encoding='utf-8') as f:
 
 setup(
     name='splitviewfuse',
-    version='0.2.2',
+    version='0.2.2.post1',
     description='A fuse implementation for an segmented view on a given directory.',
     long_description=long_description,
     url='https://github.com/seiferma/splitviewfuse',
