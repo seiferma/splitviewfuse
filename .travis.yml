@@ -12,15 +12,16 @@ script:
   - nosetests --with-coverage --cover-package=splitviewfuse
 after_success:
   - coveralls
+before_deploy:
+- git clone https://github.com/seiferma/travis-utils.git
 deploy:
-  provider: pypi
-  server: https://pypi.python.org/pypi
-  user: seiferma
-  password:
-    secure: C62GZK1Kc8CwMTPu1Snoswkfpa6wE/N7H/kDvKlG1QOerzPOhUxK2KrJzgB6kCXxw9OyFPrgC8T5aDufqMEoSuDZYlni9OI/Yhvg9Mzx/N67oxcMMtiHgbzK2s9KQujf9V23GOmlrGkVk/c2/14AJQpu3jhgCrDUM5bp68Pyi8k=
+  provider: script
+  script: travis-utils/python_deploy.sh
   on:
     tags: true
-    condition: $TRAVIS_PYTHON_VERSION = '2.7'
-after_deploy:
-  - git clone https://github.com/seiferma/travis-utils.git
-  - python travis-utils/validate_pypi_2x.py -v || exit 1
+    condition: "$TRAVIS_PYTHON_VERSION = '2.7'"
+env:
+  global:
+  - DEPLOY_URL=https://pypi.python.org/pypi
+  - DEPLOY_USER=seiferma
+  - secure: "ODXRflklJo0Lx2gMil+w9UNOWTkZx7V+pxjOV9TLFTZq/ZJNjnCzkKWLYzYKzqdldge/UpyfbltOXYuRnLdVFtRZ0wHDkdxhXayOAAuedS05qWaTSt+S/y8H20z3o3+35uuxpJp2h/7W8QNSJg6BFoNrJrV3XmlX3c1xLKaR0os="
