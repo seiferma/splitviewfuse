@@ -221,7 +221,10 @@ def parseArguments(args, descriptionText='Filesystem'):
     '''
     parser = __ThrowingArgumentParser(description=descriptionText)
     parser.add_argument('device', action=FullPaths, type=__is_dir, help='the document root for the original files')
-    parser.add_argument('dir', action=FullPaths, type=__is_dir, help='the mount point')
-    parser.add_argument("-o", action=MountOptions, type=__are_mount_options, required=True, dest='mountOptions', help='mount options')
+    parser.add_argument('dir', action=FullPaths, type=__is_dir, help='the mount point')    
+    # workaround for Issue 9694 (https://bugs.python.org/issue9694)
+    requiredArguments = parser.add_argument_group('required arguments')
+    requiredArguments.add_argument("-o", action=MountOptions, type=__are_mount_options, required=True, dest='mountOptions', help='mount options as used in /etc/fstab. You have to specify the additional option "segmentsize=<size in bytes>".')
+    
     return parser.parse_args(args[1:])
 
