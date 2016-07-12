@@ -2,6 +2,7 @@ from fuse import FUSE
 from splitviewfuse import SplitViewFuseBase
 from splitviewfuse.filehandlecontainers.VirtualFileSegmentFileHandleContainer import VirtualFileSegmentFileHandleContainer
 from splitviewfuse.SegmentUtils import SegmentUtils
+from math import ceil
 import os
 import sys
 from splitviewfuse.SplitViewFuseBase import ArgumentParserError
@@ -22,7 +23,7 @@ class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
         if not os.path.isdir(absRootPathEntry):
             fileSize = os.path.getsize(absRootPathEntry)
             if fileSize > self.maxFileSize:
-                numberOfParts = fileSize // self.maxFileSize + 1
+                numberOfParts = int(ceil(fileSize / float(self.maxFileSize)))
                 for i in range(0, numberOfParts):
                     dirContent.append(SegmentUtils.joinSegmentPath(entry, i))
                 return dirContent

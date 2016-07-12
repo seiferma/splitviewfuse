@@ -75,7 +75,7 @@ class VirtualRegularFile(VirtualFile):
             raise ValueError('Not all required (inner) segments could be found.')
         
         # Validate found segment sizes
-        if not all(os.path.getsize(entry.getPath()) is maxSegmentSize for entry in entries[0:-1]) or os.path.getsize(entries[-1].getPath()) > maxSegmentSize:
+        if not all(os.path.getsize(entry.getPath()) == maxSegmentSize for entry in entries[0:-1]) or os.path.getsize(entries[-1].getPath()) > maxSegmentSize:
             raise ValueError('The size of at least one found segment is wrong.')
         
         return entries
