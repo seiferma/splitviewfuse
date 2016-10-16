@@ -4,6 +4,7 @@ from tests.TestTmpDirectory import TestTmpDirectory
 from fuse import FuseOSError
 import os
 import stat
+import logging
 from tempfile import mkdtemp
 import shutil
 from splitviewfuse import SplitViewFuseBase
@@ -166,23 +167,25 @@ class SplitViewFuseBaseTestBase(object):
     def testArgumentParsingSucceedsOnMinimalCommand(self):
         arguments = [None, '-o', 'segmentsize=12', self.tmpDir.tmpDir, self.tmpDir2]
         parsedArguments = SplitViewFuseBase.parseArguments(arguments)
-        self.__assertArguments(self.tmpDir.tmpDir, self.tmpDir2, 12, parsedArguments)
+        self.__assertArguments(self.tmpDir.tmpDir, self.tmpDir2, 12, None, None, parsedArguments)
         self.assertEqual(0, len(parsedArguments.mountOptions['other']))
         
     def testArgumentParsingSucceedsWithAdditionalOptions(self):
-        arguments = [None, '-o', 'segmentsize=12,allow_others,foreground,abc=123', self.tmpDir.tmpDir, self.tmpDir2]
+        arguments = [None, '-o', 'segmentsize=12,allow_others,foreground,abc=123,loglevel=info,logfile=/tmp/123.log', self.tmpDir.tmpDir, self.tmpDir2]
         parsedArguments = SplitViewFuseBase.parseArguments(arguments)
-        self.__assertArguments(self.tmpDir.tmpDir, self.tmpDir2, 12, parsedArguments)
+        self.__assertArguments(self.tmpDir.tmpDir, self.tmpDir2, 12, logging.INFO, "/tmp/123.log", parsedArguments)
         self.assertEqual(3, len(parsedArguments.mountOptions['other']))
         self.assertTrue(parsedArguments.mountOptions['other']['allow_others'])
         self.assertTrue(parsedArguments.mountOptions['other']['foreground'])
         self.assertEqual('123', parsedArguments.mountOptions['other']['abc'])
         
-    def __assertArguments(self, device, mountPoint, segmentSize, parsedArguments):
+    def __assertArguments(self, device, mountPoint, segmentSize, loglevel, logfile, parsedArguments):
         self.assertEqual(device, parsedArguments.device)
         self.assertEqual(mountPoint, parsedArguments.dir)
-        self.assertEqual(2, len(parsedArguments.mountOptions))
+        self.assertEqual(4, len(parsedArguments.mountOptions))
         self.assertEqual(segmentSize, parsedArguments.mountOptions['segmentsize'])
+        self.assertEqual(loglevel, parsedArguments.mountOptions['loglevel'])
+        self.assertEqual(logfile, parsedArguments.mountOptions['logfile'])
         
     def testArgumentParsingFailsOnNonExistingDevice(self):
         with self.assertRaises(ArgumentParserError):
@@ -207,6 +210,21 @@ class SplitViewFuseBaseTestBase(object):
     def testArgumentParsingFailsOnZeroSegmentSize(self):
         with self.assertRaises(ArgumentParserError):
             arguments = [None, '-o', 'segmentsize=0', self.tmpDir.tmpDir, self.tmpDir.notExistingFile]
+            SplitViewFuseBase.parseArguments(arguments)
+    
+    def testArgumentParsingFailsOnMissingLogLevelValue(self):
+        with self.assertRaises(ArgumentParserError):
+            arguments = [None, '-o', 'segmentsize=12,loglevel', self.tmpDir.tmpDir, self.tmpDir2]
+            SplitViewFuseBase.parseArguments(arguments)
+    
+    def testArgumentParsingFailsOnInvalidLogLevel(self):
+        with self.assertRaises(ArgumentParserError):
+            arguments = [None, '-o', 'segmentsize=12,loglevel=infoa', self.tmpDir.tmpDir, self.tmpDir2]
+            SplitViewFuseBase.parseArguments(arguments)
+            
+    def testArgumentParsingFailsOnMissingLogFileValue(self):
+        with self.assertRaises(ArgumentParserError):
+            arguments = [None, '-o', 'segmentsize=12,logfile', self.tmpDir.tmpDir, self.tmpDir2]
             SplitViewFuseBase.parseArguments(arguments)
             
     

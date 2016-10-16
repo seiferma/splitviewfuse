@@ -1,15 +1,19 @@
+from LoggingUtils import LoggingUtil
 from abc import ABCMeta, abstractmethod
 from argparse import ArgumentParser, ArgumentTypeError, Action
 from errno import EACCES, EPERM, ENOENT, EBADFD
 from fuse import FuseOSError, Operations, LoggingMixIn
-import os, stat
+import logging, os, stat
 
 
 class SplitViewFuseBase(LoggingMixIn, Operations):
     
     __metaclass__ = ABCMeta
     
-    def __init__(self, root, maxFileSize, fileHandleContainer):
+    
+    def __init__(self, root, maxFileSize, fileHandleContainer, logLevel = None, logFile = None):
+        LoggingUtil.initialize(logLevel, logFile)
+        self.logger = LoggingUtil.getLogger(SplitViewFuseBase)
         self.root = os.path.realpath(root)
         self.maxFileSize = maxFileSize
         self.fileHandleContainer = fileHandleContainer
@@ -163,17 +167,21 @@ class FullPaths(Action):
         setattr(namespace, self.dest, os.path.abspath(os.path.expanduser(values)))
         
 class MountOptions(Action):
+    
+    LOGLEVELS = {"debug" : logging.DEBUG, "info" : logging.INFO, "warn" : logging.WARN, "error" : logging.ERROR}
+    
     def __call__(self, parser, namespace, values, option_string=None):
         resultObject = dict()
-        options = values.split(',')
+        options = values
         
-        resultObject["segmentsize"] = None
-        maxFileSizeOptions = [s for s in options if s.startswith("segmentsize=")]
-        resultObject["segmentsize"] = int(maxFileSizeOptions[0][len("segmentsize="):])
+        resultObject["segmentsize"] = int(MountOptions.__determineKeyValueOption__(options, "segmentsize")[1])
         if resultObject["segmentsize"] < 1:
             raise ArgumentParserError("The given maximum segment size is invalid because it is less than 1.")
-            
-        interestingOptions = ["segmentsize="]
+        
+        resultObject["loglevel"] = MountOptions.__convert_to_loglevel(MountOptions.__determineKeyValueOption__(options, "loglevel")[1])
+        resultObject["logfile"] = MountOptions.__determineKeyValueOption__(options, "logfile")[1]
+
+        interestingOptions = ["segmentsize=", "loglevel=", "logfile="]
         filteredOptions = filter(lambda x: not any(x.startswith(string) for string in interestingOptions), options)
         otherOptions = dict()
         for option in filteredOptions:
@@ -185,6 +193,48 @@ class MountOptions(Action):
         resultObject["other"] = otherOptions
 
         setattr(namespace, self.dest, resultObject)
+        
+    @staticmethod
+    def __determineKeyValueOption__(options, name):
+        for option in options:
+            keyString = name + "="
+            if option.startswith(keyString):
+                return name, option[len(keyString):]
+            if option == name:
+                return name, None
+        return None, None
+    
+    @staticmethod        
+    def are_mount_options(options):
+        optionList = options.split(',')
+        
+        if "" in optionList:
+            raise ArgumentTypeError("Empty option given.")
+        
+        _, maxFileSize = MountOptions.__determineKeyValueOption__(optionList, "segmentsize")
+        if maxFileSize is None:
+            raise ArgumentTypeError("The segment size option is mandatory.")
+        if not maxFileSize.isdigit():
+            raise ArgumentTypeError("The segment size has to be a number.")
+        
+        logFileKey, logFile = MountOptions.__determineKeyValueOption__(optionList, "logfile")
+        if logFileKey is not None and (logFile is None or logFile == ""):
+            raise ArgumentTypeError("You have to specify a log file path if you use the logfile option.")
+        
+        logLevelKey, logLevel = MountOptions.__determineKeyValueOption__(optionList, "loglevel")
+        if logLevelKey is not None and MountOptions.__convert_to_loglevel(logLevel) is None:
+            raise ArgumentTypeError("The given log level is invalid. Use one of {} instead.".format(", ".join(MountOptions.LOGLEVELS.keys())))
+        
+        return optionList
+    
+    @staticmethod
+    def __convert_to_loglevel(value):
+        if not MountOptions.LOGLEVELS.has_key(value):
+            return None
+        return MountOptions.LOGLEVELS.get(value)
+        
+def __are_mount_options(options):
+    return MountOptions.are_mount_options(options)
      
 def __is_dir(dirname):
     """Checks if a path is an actual directory"""
@@ -192,21 +242,8 @@ def __is_dir(dirname):
         msg = "{0} is not a directory".format(dirname)
         raise ArgumentTypeError(msg)
     else:
-        return dirname 
+        return dirname
     
-def __are_mount_options(options):
-    optionList = options.split(',')
-    
-    if "" in optionList:
-        raise ArgumentTypeError("Empty option given.")
-    
-    maxFileSizeOptions = [x for x in optionList if x.startswith("segmentsize=")]
-    if len(maxFileSizeOptions) != 1:
-        raise ArgumentTypeError("The segment size option is mandatory.")
-    if not maxFileSizeOptions[0][len("segmentsize="):].isdigit():
-        raise ArgumentTypeError("The segment size has to be a number.")
-        
-    return options
 
 class ArgumentParserError(Exception): pass
 class __ThrowingArgumentParser(ArgumentParser):

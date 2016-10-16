@@ -7,13 +7,13 @@ import shutil
 class TestSplitViewFuse(SplitViewFuseBaseTestBase, unittest.TestCase):
     
     def createTestSubject(self, root, maxSegmentSize):
-        return SplitViewFuse(root, maxSegmentSize)
+        return SplitViewFuse(root, maxSegmentSize, None, None)
     
     def testReadDir(self):
         shutil.copyfile(self.tmpDir.regularfile, os.path.join(self.tmpDir2, 'bigfile'))
         shutil.copyfile(self.tmpDir.regularfile2, os.path.join(self.tmpDir2, 'smallfile'))
         os.makedirs(os.path.join(self.tmpDir2, 'dir'))
-        subject = SplitViewFuse(self.tmpDir2, SplitViewFuseBaseTestBase.SEGMENT_SIZE)
+        subject = SplitViewFuse(self.tmpDir2, SplitViewFuseBaseTestBase.SEGMENT_SIZE, None, None)
         
         actualDirContent = subject.readdir('/', None)
         self.assertEqual(6, len(actualDirContent))
@@ -26,7 +26,7 @@ class TestSplitViewFuse(SplitViewFuseBaseTestBase, unittest.TestCase):
 
     def testReadDirExactSegmentSize(self):
         shutil.copyfile(self.tmpDir.segment1File, os.path.join(self.tmpDir2, 'a'))
-        subject = SplitViewFuse(self.tmpDir2, SplitViewFuseBaseTestBase.SEGMENT_SIZE/2)
+        subject = SplitViewFuse(self.tmpDir2, SplitViewFuseBaseTestBase.SEGMENT_SIZE/2, None, None)
 
         actualDirContent = subject.readdir('/', None)
         self.assertEqual(4, len(actualDirContent))

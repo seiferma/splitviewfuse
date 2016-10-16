@@ -11,8 +11,8 @@ from argparse import ArgumentTypeError
 
 class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
     
-    def __init__(self, root, maxSegmentSize):
-        super(SplitViewFuse, self).__init__(root, maxSegmentSize, VirtualFileSegmentFileHandleContainer(maxSegmentSize))
+    def __init__(self, root, maxSegmentSize, loglevel, logfile):
+        super(SplitViewFuse, self).__init__(root, maxSegmentSize, VirtualFileSegmentFileHandleContainer(maxSegmentSize), loglevel, logfile)
 
     def _SplitViewFuseBase__processReadDirEntry(self, absRootPath, entry):
         dirContent = list()
@@ -37,7 +37,7 @@ class SplitViewFuse(SplitViewFuseBase.SplitViewFuseBase):
 def main():
     try:
         args = SplitViewFuseBase.parseArguments(sys.argv, 'Filesystem that splits files into segments of given size. The size is specified in the mount options.')
-        _ = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, **args.mountOptions['other'])
+        _ = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize'], args.mountOptions['loglevel'], args.mountOptions['logfile']), args.dir, **args.mountOptions['other'])
         #fuse = FUSE(SplitViewFuse(args.device, args.mountOptions['segmentsize']), args.dir, nothreads=True, foreground=True)
     except ArgumentParserError as e:
         print('Error during command line parsing: {0}'.format(str(e)))
