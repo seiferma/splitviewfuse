@@ -1,9 +1,11 @@
 splitviewfuse
 =============
-.. image:: https://secure.travis-ci.org/seiferma/splitviewfuse.png
+.. image:: https://img.shields.io/travis/seiferma/splitviewfuse.svg
     :target: http://travis-ci.org/seiferma/splitviewfuse
 .. image:: https://coveralls.io/repos/seiferma/splitviewfuse/badge.png?branch=master
     :target: https://coveralls.io/r/seiferma/splitviewfuse?branch=master
+.. image:: https://img.shields.io/pypi/v/splitviewfuse.svg
+    :target: https://pypi.python.org/pypi/splitviewfuse
 
 Description
 -----------
