@@ -137,6 +137,11 @@ class SplitViewFuseBaseTestBase(object):
         expectedStats['st_mode'] = expectedStats['st_mode'] & ~(stat.S_IWUSR | stat.S_IWGRP | stat.S_IWOTH) 
         self.assertDictEqual(expectedStats, actualStats)
         
+    def testGetAttrFailsOnBrokenSymlinkedFile(self):
+        with self.assertRaises(FuseOSError):
+            os.remove(self.tmpDir.regularfile)
+            self.subject.getattr(self.getRootRelativePath(self.tmpDir.slRegularFile))
+        
     def testOpenSucceedsOnFile(self):
         fileHandle = self.subject.open(self.getRootRelativePath(self.tmpDir.regularfile2), os.O_RDONLY)
         self.subject.release(None, fileHandle)

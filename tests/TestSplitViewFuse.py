@@ -35,6 +35,19 @@ class TestSplitViewFuse(SplitViewFuseBaseTestBase, unittest.TestCase):
         self.assertIn('a.seg.0', actualDirContent)
         self.assertIn('a.seg.1', actualDirContent)
 
+    def testReadDirBrokenSymlink(self):
+        bigFileTmp2 = os.path.join(self.tmpDir2, 'bigfile')
+        shutil.copyfile(self.tmpDir.regularfile, bigFileTmp2)
+        os.symlink(bigFileTmp2, os.path.join(self.tmpDir2, 'symlink'))
+        os.remove(bigFileTmp2)
+        subject = SplitViewFuse(self.tmpDir2, SplitViewFuseBaseTestBase.SEGMENT_SIZE, None, None)
+        
+        actualDirContent = subject.readdir('/', None)
+        self.assertEqual(3, len(actualDirContent))
+        self.assertIn('.', actualDirContent)
+        self.assertIn('..', actualDirContent)
+        self.assertIn('symlink', actualDirContent)
+        
 
 if __name__ == "__main__":
     #import sys;sys.argv = ['', 'Test.testName']

@@ -24,7 +24,10 @@ class SplitViewFuseBase(LoggingMixIn, Operations):
     def __getAbsolutePath(self, path):
         absRootPath = self.root + path
         if os.path.islink(absRootPath):
-            return os.path.realpath(absRootPath)
+            realPath = os.path.realpath(absRootPath)
+            if not os.path.exists(realPath):
+                raise FuseOSError(ENOENT)
+            return realPath
         return absRootPath
    
     @abstractmethod
